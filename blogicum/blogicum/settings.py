@@ -3,17 +3,16 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
-
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = "django-insecure--(l^0gy-mtua5vb^c5^q1sz7jur^#yrg$6%@b+ws5*-ij9h4w@"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS: list[str] = [
+    'localhost',
+    '127.0.0.1',
+]
 
 
 # Application definition
@@ -124,3 +123,11 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 LOGIN_REDIRECT_URL = 'blog:index'
 
 LOGIN_URL = 'login'
+
+EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+
+EMAIL_FILE_PATH = BASE_DIR / 'sent_emails'
+
+CSRF_FAILURE_VIEW = 'pages.views.csrf_failure'
+
+MEDIA_ROOT = BASE_DIR / 'media'

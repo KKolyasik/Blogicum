@@ -14,9 +14,10 @@ class PublishedPostsQuerySet(models.QuerySet):
             category__is_published=True
         )
 
-    def recent_posts(self, limit=None):
-        """
-        Сортирует по дате публикации в убывающем порядке.
-        Ограничивает количество записей до значения limit
-        """
-        return self.published()[:limit]
+
+class PostManager(models.Manager):
+    def get_queryset(self):
+        return PublishedPostsQuerySet(self.model, using=self._db)
+
+    def published(self):
+        return self.get_queryset().published()

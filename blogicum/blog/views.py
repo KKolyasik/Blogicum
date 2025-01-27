@@ -9,6 +9,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Count
+from django.http import Http404
 
 
 class OnlyAuthorMixin(LoginRequiredMixin, UserPassesTestMixin):
@@ -45,7 +46,7 @@ class PostCreateView(LoginRequiredMixin, CreateView):
         )
 
 
-class PostUpdateView(OnlyAuthorMixin, UpdateView):
+class PostUpdateView(LoginRequiredMixin, UpdateView):
     model = Post
     form_class = PostForm
     template_name = 'blog/create.html'
@@ -60,7 +61,7 @@ class PostUpdateView(OnlyAuthorMixin, UpdateView):
         return reverse_lazy('blog:post_detail', kwargs={'pk': self.object.id})
 
 
-class PostDeleteView(OnlyAuthorMixin, DeleteView):
+class PostDeleteView(DeleteView):
     model = Post
     template_name = 'blog/create.html'
     success_url = reverse_lazy('blog:index')
@@ -75,6 +76,12 @@ class PostDeleteView(OnlyAuthorMixin, DeleteView):
 class PostDetailView(DetailView):
     model = Post
     template_name = 'blog/detail.html'
+
+    def get_object(self):
+        post = super().get_object()
+        if not post.is_published and self.request.user != post.author:
+            raise Http404("Post not found.")
+        return post
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -100,7 +107,8 @@ class ProfileDetailView(DetailView):
             post_list = user.author.all()
         else:
             post_list = user.author.published()
-        post_list = post_list.annotate(comment_count=Count('comment'))
+        post_list = post_list.annotate(
+            comment_count=Count('comment')).order_by('-pub_date')
         # Пагинация для постов
         paginator = Paginator(post_list, 10)
         page_number = self.request.GET.get('page')
@@ -151,7 +159,7 @@ def add_comment(request, pk):
     return redirect('blog:post_detail', pk=pk)
 
 
-class CommentsUpdateView(OnlyAuthorMixin, UpdateView):
+class CommentsUpdateView(UpdateView):
     model = Comments
     form_class = CommentsForm
     template_name = 'blog/comment.html'
@@ -181,7 +189,7 @@ class CommentsUpdateView(OnlyAuthorMixin, UpdateView):
         )
 
 
-class CommentsDeleteView(OnlyAuthorMixin, DeleteView):
+class CommentsDeleteView(DeleteView):
     model = Comments
     template_name = 'blog/comment.html'
     success_url = reverse_lazy('blog:index')
