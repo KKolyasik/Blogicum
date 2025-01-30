@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils import timezone
+from django.db.models import Count
 
 
 class PublishedPostsQuerySet(models.QuerySet):
@@ -14,10 +15,10 @@ class PublishedPostsQuerySet(models.QuerySet):
             category__is_published=True
         )
 
-
-class PostManager(models.Manager):
-    def get_queryset(self):
-        return PublishedPostsQuerySet(self.model, using=self._db)
-
-    def published(self):
-        return self.get_queryset().published()
+    def annotate_comments(self):
+        """
+        Добавлят аннотацию комментариев к нужной выборке и
+        сортирует их по дате добовления
+        """
+        return self.annotate(
+            comment_count=Count('comments')).order_by('-pub_date')

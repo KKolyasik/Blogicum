@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth import get_user_model
-from blog.querysets import PostManager
+from blog.querysets import PublishedPostsQuerySet
+from typing import Union
 
 TITLE_MAX_LENGTH = 256
 
@@ -92,7 +93,8 @@ class Post(TimeStampedModel):
     )
     image = models.ImageField('Фото', upload_to='posts_images', blank=True)
 
-    objects = PostManager()
+    objects: Union[PublishedPostsQuerySet,
+                   models.QuerySet] = PublishedPostsQuerySet().as_manager()
 
     class Meta:
         verbose_name = "публикация"
@@ -104,17 +106,18 @@ class Post(TimeStampedModel):
 
 
 class Comments(models.Model):
-    text: models.TextField = models.TextField(verbose_name='Текст комментария')
+    author: models.ForeignKey = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='authored_comments'
+    )
     post: models.ForeignKey = models.ForeignKey(
         Post,
         on_delete=models.CASCADE,
-        related_name='comment'
+        related_name='comments'
     )
+    text: models.TextField = models.TextField(verbose_name='Текст комментария')
     created_at: models.DateTimeField = models.DateTimeField(auto_now_add=True)
-    author: models.ForeignKey = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE
-    )
 
     class Meta:
         verbose_name = 'комментарий'
