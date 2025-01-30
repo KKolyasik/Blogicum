@@ -82,9 +82,9 @@ class ProfileDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         user = self.get_object()
         if self.request.user == user:
-            post_list = user.author.all()
+            post_list = user.posts.all()
         else:
-            post_list = user.author.published()
+            post_list = user.posts.published()
         post_list = post_list.annotate_comments()
         paginator = Paginator(post_list, 10)
         page_number = self.request.GET.get('page')

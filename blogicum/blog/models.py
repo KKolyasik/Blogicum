@@ -67,7 +67,6 @@ class Post(TimeStampedModel):
         User,
         on_delete=models.CASCADE,
         verbose_name="Автор публикации",
-        related_name='author'
     )
     location: models.ForeignKey = models.ForeignKey(
         Location, null=True, on_delete=models.SET_NULL,
@@ -78,7 +77,6 @@ class Post(TimeStampedModel):
         null=True,
         on_delete=models.SET_NULL,
         verbose_name="Категория",
-        related_name="posts"
     )
     title: models.CharField = models.CharField(
         max_length=TITLE_MAX_LENGTH,
@@ -100,6 +98,7 @@ class Post(TimeStampedModel):
         verbose_name = "публикация"
         verbose_name_plural = "Публикации"
         ordering = ("-pub_date",)
+        default_related_name = "posts"
 
     def __str__(self):
         return self.title
@@ -109,12 +108,10 @@ class Comments(models.Model):
     author: models.ForeignKey = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='authored_comments'
     )
     post: models.ForeignKey = models.ForeignKey(
         Post,
         on_delete=models.CASCADE,
-        related_name='comments'
     )
     text: models.TextField = models.TextField(verbose_name='Текст комментария')
     created_at: models.DateTimeField = models.DateTimeField(auto_now_add=True)
@@ -123,3 +120,4 @@ class Comments(models.Model):
         verbose_name = 'комментарий'
         verbose_name_plural = 'комментарии'
         ordering = ('created_at',)
+        default_related_name = 'comments'
