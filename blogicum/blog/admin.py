@@ -1,5 +1,5 @@
 from django.contrib import admin
-from blog.models import Category, Location, Post
+from blog.models import Category, Location, Post, Comments
 
 
 class PostAdmin(admin.ModelAdmin):
@@ -11,7 +11,7 @@ class PostAdmin(admin.ModelAdmin):
         'location',
         'category',
         'is_published',
-        'created_at'
+        'created_at',
     )
     list_editable = (
         'text',
@@ -22,7 +22,7 @@ class PostAdmin(admin.ModelAdmin):
     list_filter = (
         'pub_date',
         'created_at',
-        'category'
+        'category',
     )
 
 
@@ -30,14 +30,24 @@ class CategoryAdmin(admin.ModelAdmin):
     list_display = (
         'title',
         'description',
-        'slug'
+        'slug',
     )
     list_editable = (
         'description',
-        'slug'
+        'slug',
+    )
+
+
+class CommentsAdmin(admin.ModelAdmin):
+    list_display = (
+        'text',
+        'post',
+        'author',
+        'created_at',
     )
 
 
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(Location)
 admin.site.register(Post, PostAdmin)
+admin.site.register(Comments, CommentsAdmin)
